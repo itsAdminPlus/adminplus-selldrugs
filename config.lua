@@ -11,6 +11,7 @@ Config = {
         title = 'Drugs',
         nodrugs = 'You don\'t have any drugs to sell.',
         cooldown = 'Please wait some time!',
+        cancelsell = 'The sell has been cancelled.',
         toofar = 'You\'re too far from the city.',
         cops = 'There\'s no cops in the city.',
         searching = 'You\'re searching for clients for ',
