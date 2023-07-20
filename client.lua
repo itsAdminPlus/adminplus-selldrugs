@@ -158,7 +158,7 @@ next_ped = function(drugToSell)
 			ESX.Game.Utils.DrawText3D(npc.coords, (Config.notify.client):format(drugToSell.count, drugToSell.label), 0.5)
 			distance = Vdist2(GetEntityCoords(PlayerPedId()), npc.coords)
 
-			if distance >= 105.0 then
+			if distance >= 2.5 then
 				if IsControlJustPressed(0, 49) or IsControlJustPressed(0, 73) and canSell then
 					canSell = false
 					lib.hideTextUI()
@@ -189,7 +189,28 @@ next_ped = function(drugToSell)
 					position = "right-center",
 					icon = 'pills',
 				})
-				if IsControlJustPressed(0, 38) and canSell then
+				if IsControlJustPressed(0, 49) or IsControlJustPressed(0, 73) and canSell then
+					canSell = false
+					lib.hideTextUI()
+					lib.notify({
+						title = Config.notify.title,
+						description = Config.notify.cancelsell,
+						position = 'center-right',
+						duration = 8000,
+						style = {
+							backgroundColor = '#141517',
+							color = '#EE4B2B',
+							['.description'] = {
+							  color = '#FFFFFF'
+							}
+						},
+						icon = 'pills',
+						iconColor = '#EE4B2B'
+					})
+					LocalPlayer.state.invBusy = false
+					SetPedAsNoLongerNeeded(npc.ped)
+					npc = {}
+				elseif IsControlJustPressed(0, 38) and canSell then
 					canSell = false
 					reject = math.random(1, 6)
 					lib.hideTextUI()
