@@ -43,11 +43,16 @@ end, false)
 RegisterServerEvent('stasiek_selldrugsv2:pay')
 AddEventHandler('stasiek_selldrugsv2:pay', function(drugToSell)
     xPlayer = ESX.GetPlayerFromId(source)
-    xPlayer.removeInventoryItem(drugToSell.type, drugToSell.count)
-    if Config.account == 'money' then
-        xPlayer.addMoney(drugToSell.price)
+    local count = xPlayer.getInventoryItem(drugToSell.type).count
+    if count >= drugToSell.count then
+        xPlayer.removeInventoryItem(drugToSell.type, drugToSell.count)
+        if Config.account == 'money' then
+            xPlayer.addMoney(drugToSell.price)
+        else
+            xPlayer.addAccountMoney(Config.account, drugToSell.price)
+        end
     else
-        xPlayer.addAccountMoney(Config.account, drugToSell.price)
+        TriggerClientEvent('ox_lib:notify', source, {title = 'Drugs', description = Config.notify.nodrugs, duration = 8000, position = 'center-right', icon = 'pills'})
     end
 end)
 
