@@ -62,17 +62,16 @@ AddEventHandler('stasiek_selldrugsv2:notifycops', function(drugToSell)
 end)
 
 ESX.RegisterServerCallback('stasiek_selldrugsv2:getPoliceCount', function(source, cb)
-    count = 0
+    local count = 0
 
     if Config.requiredCops then 
-    for k, v in pairs(ESX.GetPlayers()) do
-        local xPlayer = ESX.GetPlayerFromId(v)
-        if xPlayer ~= nil then 
-            if xPlayer.job.name == "police" then
-                count = count + 1
-            end
+        local xPlayers = ESX.GetExtendedPlayers('job', 'police')
+
+        for _, xPlayer in pairs(xPlayers) do
+            count = count + 1
         end
-    end
+        --print(count)
+
         cb(count)
     else
         cb(count)
