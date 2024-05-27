@@ -15,6 +15,10 @@ AddEventHandler('esx:setJob', function(job)
 end)
 
 Citizen.CreateThread(function()
+	while ESX.GetPlayerData().job == nil do
+		Citizen.Wait(5000)
+	end
+
 	PlayerData = ESX.GetPlayerData()
 	ESX.Streaming.RequestStreamedTextureDict('DIA_CLIFFORD')
 
@@ -45,7 +49,6 @@ end)
 next_ped = function(drugToSell)
 
 	if cooldown then
-		--ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.cooldown, 'DIA_CLIFFORD', 1)
 		lib.notify({
 			title = Config.notify.title,
 			description = Config.notify.cooldown,
@@ -58,8 +61,7 @@ next_ped = function(drugToSell)
 
 	cooldown = true
 
-	if Config.cityPoint ~= false and GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), Config.cityPoint, true) > 1500.0 then
-		--ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.toofar, 'DIA_CLIFFORD', 1)
+	if Config.cityPoint ~= false and #(GetEntityCoords(PlayerPedId()) - Config.cityPoint) > 1500.0 then
 		lib.notify({
 			title = Config.notify.title,
 			description = Config.notify.toofar,
@@ -72,6 +74,7 @@ next_ped = function(drugToSell)
 
 	if npc ~= nil and npc.ped ~= nil then
 		SetPedAsNoLongerNeeded(npc.ped)
+		DeletePed(npc.ped)
 	end
 
 	cops = 0
@@ -82,25 +85,30 @@ next_ped = function(drugToSell)
 	Wait(500)
 
 	if cops < Config.requiredCops then
-		ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.cops, 'DIA_CLIFFORD', 1)
+		lib.notify({
+			title = Config.notify.title,
+			description = Config.notify.cops,
+			position = 'center-right',
+			duration = 8000,
+			icon = 'pills'
+		})
 		return
 	end
 
 	if cops == 3 then
-		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.05)
+		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.03)
 	elseif cops == 4 then
-		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.07)
+		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.05)
 	elseif cops == 5 then
-		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.10)
+		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.07)
 	elseif cops == 6 then
-		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.15)
+		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.10)
 	elseif cops >= 7 then
-		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.20)
+		drugToSell.price = ESX.Math.Round(drugToSell.price * 1.14)
 	end
 
 	TaskStartScenarioInPlace(PlayerPedId(), "WORLD_HUMAN_STAND_MOBILE", 0, true)
 	LocalPlayer.state.invBusy = true
-	--ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.searching .. drugToSell.label, 'DIA_CLIFFORD', 1)
 	lib.notify({
 		title = Config.notify.title,
 		description = Config.notify.searching .. drugToSell.label,
@@ -109,7 +117,6 @@ next_ped = function(drugToSell)
 		icon = 'pills'
 	})
 	Wait(math.random(5000, 10000))
-	--ESX.PlayAnim('amb@world_human_drug_dealer_hard@male@base', 'base', 8.0, -1, 1)
     ClearPedTasks(PlayerPedId()) 
 	npc.hash = GetHashKey(Config.pedlist[math.random(1, #Config.pedlist)])
 	ESX.Streaming.RequestModel(npc.hash)
@@ -118,7 +125,6 @@ next_ped = function(drugToSell)
 
 	if retval == false then
 		cooldown = false
-		--ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.abort, 'DIA_CLIFFORD', 1)
 		lib.notify({
 			title = Config.notify.title,
 			description = Config.notify.abort,
@@ -138,7 +144,6 @@ next_ped = function(drugToSell)
 	SetEntityAsMissionEntity(npc.ped)
 	
 	if IsEntityDead(npc.ped) or GetEntityCoords(npc.ped) == vector3(0.0, 0.0, 0.0) then
-		--ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.notfound, 'DIA_CLIFFORD', 1)
 		lib.notify({
 			title = Config.notify.title,
 			description = Config.notify.notfound,
@@ -149,8 +154,6 @@ next_ped = function(drugToSell)
 		LocalPlayer.state.invBusy = false
 		return
 	end
-	
-	--ESX.ShowAdvancedNotification(Config.notify.title, Config.notify.approach, Config.notify.found .. npc.zone, 'DIA_CLIFFORD', 1)
 	lib.notify({
 		title = Config.notify.title,
 		description = Config.notify.approach, Config.notify.found .. npc.zone,
@@ -167,7 +170,7 @@ next_ped = function(drugToSell)
 			npc.coords = GetEntityCoords(npc.ped)
 			ESX.Game.Utils.DrawText3D(npc.coords, (Config.notify.client):format(drugToSell.count, drugToSell.label), 0.5)
 			distance = Vdist2(GetEntityCoords(PlayerPedId()), npc.coords)
-
+			
 			if distance >= 2.5 then
 				if IsControlJustPressed(0, 49) or IsControlJustPressed(0, 73) and canSell then
 					canSell = false
@@ -189,12 +192,12 @@ next_ped = function(drugToSell)
 					})
 					LocalPlayer.state.invBusy = false
 					SetPedAsNoLongerNeeded(npc.ped)
+					DeletePed(npc.ped)
 					npc = {}
 				end
 			end
 			
 			if distance < 2.0 then
-				--ESX.ShowHelpNotification(Config.notify.press)
 				lib.showTextUI('[E] - Sell Drugs to Local', {
 					position = "right-center",
 					icon = 'pills',
@@ -219,14 +222,28 @@ next_ped = function(drugToSell)
 					})
 					LocalPlayer.state.invBusy = false
 					SetPedAsNoLongerNeeded(npc.ped)
+					if Config.deleteped then
+						lib.progressBar({
+							duration = Config.deletepedtime,
+							label = Config.notify.deletepedtext,
+							useWhileDead = false,
+							canCancel = false,
+							disable = {
+								car = true,
+							},
+						})
+						DeletePed(npc.ped)
+					end
 					npc = {}
 				elseif IsControlJustPressed(0, 38) and canSell then
 					canSell = false
-					reject = math.random(1, 6)
+					reject = math.random(1, 100)
+					if Config.randomsuccessalert then
+						alert = math.random(1, 100)
+					end
 					lib.hideTextUI()
 					LocalPlayer.state.invBusy = false
-					if reject <= 3 then
-						--ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.reject, 'DIA_CLIFFORD', 1)
+					if reject <= Config.rejectchance then
 						lib.notify({
 							title = Config.notify.title,
 							description = Config.notify.reject,
@@ -250,12 +267,23 @@ next_ped = function(drugToSell)
 						if Config.npcFightOnReject then
 							TaskCombatPed(npc.ped, PlayerPedId(), 0, 16)
 						end
+						if Config.deleteped then
+							lib.progressBar({
+								duration = Config.deletepedtime,
+								label = Config.notify.deletepedtext,
+								useWhileDead = false,
+								canCancel = false,
+								disable = {
+									car = true,
+								},
+							})
+							DeletePed(npc.ped)
+						end
 						npc = {}
 						return
 					end
 
 					if IsPedInAnyVehicle(PlayerPedId(), false) then
-						--ESX.ShowAdvancedNotification(Config.notify.title, Config.notify.vehicle, '', 'DIA_CLIFFORD', 1)
 						lib.notify({
 							title = Config.notify.title,
 							description = Config.notify.vehicle,
@@ -278,6 +306,13 @@ next_ped = function(drugToSell)
 					ESX.PlayAnim('mp_common', 'givetake1_a', 8.0, -1, 0)
 					ESX.PlayAnimOnPed(npc.ped, 'mp_common', 'givetake1_a', 8.0, -1, 0)
 					Wait(1000)
+					if Config.randomsuccessalert then
+					if alert <= Config.randomsuccesschance then
+							PlayAmbientSpeech1(npc.ped, 'GENERIC_HI', 'SPEECH_PARAMS_STANDARD')
+							drugToSell.coords = GetEntityCoords(PlayerPedId())
+							TriggerServerEvent('stasiek_selldrugsv2:notifycops', drugToSell)
+						end
+					end
 					AttachEntityToEntity(obj2, PlayerPedId(), GetPedBoneIndex(PlayerPedId(),  57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
 					AttachEntityToEntity(obj, npc.ped, GetPedBoneIndex(npc.ped,  57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
 					Wait(1000)
@@ -287,7 +322,6 @@ next_ped = function(drugToSell)
 					SetPedAsNoLongerNeeded(npc.ped)
 					TriggerServerEvent('stasiek_selldrugsv2:pay', drugToSell)
 					LocalPlayer.state.invBusy = false
-					--ESX.ShowAdvancedNotification(Config.notify.title, '', (Config.notify.sold):format(drugToSell.count, drugToSell.label, drugToSell.price), 'DIA_CLIFFORD', 1)
 					lib.notify({
 						title = Config.notify.title,
 						description = (Config.notify.sold):format(drugToSell.count, drugToSell.label, drugToSell.price),
@@ -295,6 +329,18 @@ next_ped = function(drugToSell)
 						duration = 8000,
 						icon = 'pills'
 					})
+					if Config.deleteped then
+						lib.progressBar({
+							duration = Config.deletepedtime,
+							label = Config.notify.deletepedtext,
+							useWhileDead = false,
+							canCancel = false,
+							disable = {
+								car = true,
+							},
+						})
+						DeletePed(npc.ped)
+					end
 					npc = {}
 				end
 			end
@@ -319,7 +365,22 @@ AddEventHandler('stasiek_selldrugsv2:notifyPolice', function(coords)
 	if PlayerData.job ~= nil and PlayerData.job.name == 'police' then
 		street = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
 		street2 = GetStreetNameFromHashKey(street)
-		ESX.ShowAdvancedNotification(Config.notify.police_notify_title, Config.notify.police_notify_subtitle, street2, "CHAR_CALL911", 1)
+		lib.notify({
+			title = Config.notify.police_notify_title,
+			description = Config.notify.police_notify_subtitle .. " at " .. street2,
+			icon = 'pills',
+			iconAnimation = 'pulse',
+			position = 'center-left',
+			duration = 12500,
+			type = 'error',
+			style = {
+				backgroundColor = '#141517',
+				color = '#EE4B2B',
+				['.description'] = {
+				  color = '#FFFFFF'
+				}
+			},
+		})
 		PlaySoundFrontend(-1, "Bomb_Disarmed", "GTAO_Speed_Convoy_Soundset", 0)
 
 		blip = AddBlipForCoord(coords)
@@ -331,7 +392,7 @@ AddEventHandler('stasiek_selldrugsv2:notifyPolice', function(coords)
 		AddTextComponentString('# Selling Drugs')
 		EndTextCommandSetBlipName(blip)
 		table.insert(blips, blip)
-		Wait(50000)
+		Wait(90000)
 		for i in pairs(blips) do
 			RemoveBlip(blips[i])
 			blips[i] = nil
