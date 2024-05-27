@@ -3,7 +3,7 @@ THIS IS NOT MY SCRIPT, THE ORIGINAL CREATOR IS https://github.com/xxxstasiek/sta
     [ client sided code ]
     
     local data = exports['cd_dispatch']:GetPlayerInfo()
-		TriggerServerEvent('cd_dispatch:AddNotification', {
+	TriggerServerEvent('cd_dispatch:AddNotification', {
     	job_table = {'police'}, 
     	coords = npc.ped,
     	title = '10-15 - Drug Sale',
@@ -21,8 +21,23 @@ THIS IS NOT MY SCRIPT, THE ORIGINAL CREATOR IS https://github.com/xxxstasiek/sta
     	}
 	})
 
-    -- for cd_dispatch integration add this under line 83 in client.lua & remove
-    ESX.ShowAdvancedNotification(Config.notify.title, '', Config.notify.cops, 'DIA_CLIFFORD', 1)
+    -- for cd_dispatch integration add the above under line 367 in client.lua & remove
+	lib.notify({
+		title = Config.notify.police_notify_title,
+		description = Config.notify.police_notify_subtitle .. " at " .. street2,
+		icon = 'pills',
+		iconAnimation = 'pulse',
+		position = 'center-left',
+		duration = 12500,
+		type = 'error',
+		style = {
+			backgroundColor = '#141517',
+			color = '#EE4B2B',
+			['.description'] = {
+			  color = '#FFFFFF'
+			}
+		},
+	})
 
     -----------------------------------------
 
@@ -46,5 +61,5 @@ THIS IS NOT MY SCRIPT, THE ORIGINAL CREATOR IS https://github.com/xxxstasiek/sta
         }
     })
 
-    -- for cd_dispatch integration add this under line 55 in server.lua & remove
+    -- for cd_dispatch integration add the above under line 90 in server.lua & remove
     TriggerClientEvent('stasiek_selldrugsv2:notifyPolice', -1, drugToSell.coords)
