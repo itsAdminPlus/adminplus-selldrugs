@@ -1,9 +1,15 @@
 Config = {
     requiredCops = 0,
     npcFightOnReject = false,
-    deleteped = true,
-    deletepedtime = 10000, -- in miliseconds (10000 = 10 seconds)
-    account = 'money', --change to 'money' if you want
+    rejectchance = 45, -- The reject (bad sale) is randomly chosen from 1-100. (higher number = higher chance)
+    deleteped = true, -- delete ped after sale?
+    deletepedtime = 10000, -- delete ped in miliseconds (10000 = 10 seconds)
+
+    randomsuccessalert = true, -- This is a option for servers that want to avoid players powergaming the script.
+    -- (usually players wait for it to say bad sale before fleeing the scene. This enables a random chance for pd to still get alerted even when the sale is successful) [ HIGHLY RECOMMEND TO ENABLE ]
+    randomsuccesschance = 23, -- if its less than or equal to 23 it will alert PD (even if sale is successful). The alert is randomly chosen from 1-100. (higher number = higher chance)
+
+    account = 'money',
     drugs = {
         ['coke'] = 125,
         --add as much as you want
