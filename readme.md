@@ -68,8 +68,6 @@ THIS IS NOT MY SCRIPT, THE ORIGINAL CREATOR IS https://github.com/xxxstasiek/sta
 
 If you want to make required item before you can do /dealer, replace this on server-side.
 
-im a bit busy rnn but try this
-
 RegisterCommand('dealer', function(source, args, rawcommand)
     xPlayer = ESX.GetPlayerFromId(source)
     local hasRequiredItem = xPlayer.getInventoryItem('trapphone') -- change me to whatever item u want
