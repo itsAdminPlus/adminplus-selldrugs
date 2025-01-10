@@ -163,7 +163,7 @@ next_ped = function(drugToSell)
 	})
 	TaskGoToEntity(npc.ped, PlayerPedId(), 60000, 4.0, 2.0, 0, 0)
 
-	CreateThread(function()
+CreateThread(function()
 		canSell = true
 		while npc.ped ~= nil and npc.ped ~= 0 and not IsEntityDead(npc.ped) do
 			Wait(0)
@@ -190,10 +190,10 @@ next_ped = function(drugToSell)
 						icon = 'pills',
 						iconColor = '#EE4B2B'
 					})
-					LocalPlayer.state.invBusy = false
 					SetPedAsNoLongerNeeded(npc.ped)
-					DeletePed(npc.ped)
 					npc = {}
+					Wait(500)
+					LocalPlayer.state.invBusy = false
 				end
 			end
 			
@@ -220,30 +220,19 @@ next_ped = function(drugToSell)
 						icon = 'pills',
 						iconColor = '#EE4B2B'
 					})
-					LocalPlayer.state.invBusy = false
 					SetPedAsNoLongerNeeded(npc.ped)
-					if Config.deleteped then
-						lib.progressBar({
-							duration = Config.deletepedtime,
-							label = Config.notify.deletepedtext,
-							useWhileDead = false,
-							canCancel = false,
-							disable = {
-								car = true,
-							},
-						})
-						DeletePed(npc.ped)
-					end
 					npc = {}
+					Wait(500)
+					LocalPlayer.state.invBusy = false
 				elseif IsControlJustPressed(0, 38) and canSell then
 					canSell = false
-					reject = math.random(1, 100)
-					if Config.randomsuccessalert then
-						alert = math.random(1, 100)
-					end
 					lib.hideTextUI()
-					LocalPlayer.state.invBusy = false
-					if reject <= Config.rejectchance then
+					LocalPlayer.state.invBusy = true 
+					
+					reject = math.random(1, 100)
+					alert = math.random(1, 100)
+					
+					if reject <= 45 then
 						lib.notify({
 							title = Config.notify.title,
 							description = Config.notify.reject,
@@ -259,7 +248,6 @@ next_ped = function(drugToSell)
 							icon = 'pills',
 							iconColor = '#EE4B2B'
 						})
-						LocalPlayer.state.invBusy = false
 						PlayAmbientSpeech1(npc.ped, 'GENERIC_HI', 'SPEECH_PARAMS_STANDARD')
 						drugToSell.coords = GetEntityCoords(PlayerPedId())
 						TriggerServerEvent('stasiek_selldrugsv2:notifycops', drugToSell)
@@ -267,22 +255,12 @@ next_ped = function(drugToSell)
 						if Config.npcFightOnReject then
 							TaskCombatPed(npc.ped, PlayerPedId(), 0, 16)
 						end
-						if Config.deleteped then
-							lib.progressBar({
-								duration = Config.deletepedtime,
-								label = Config.notify.deletepedtext,
-								useWhileDead = false,
-								canCancel = false,
-								disable = {
-									car = true,
-								},
-							})
-							DeletePed(npc.ped)
-						end
 						npc = {}
+						Wait(500)
+						LocalPlayer.state.invBusy = false  
 						return
 					end
-
+	
 					if IsPedInAnyVehicle(PlayerPedId(), false) then
 						lib.notify({
 							title = Config.notify.title,
@@ -291,37 +269,43 @@ next_ped = function(drugToSell)
 							icon = 'pills',
 							type = 'success'
 						})
+						Wait(500)
 						LocalPlayer.state.invBusy = false
 						return
 					end
-
+	
+					
 					ESX.Game.MakeEntityFaceEntity(PlayerPedId(), npc.ped)
 					ESX.Game.MakeEntityFaceEntity(npc.ped, PlayerPedId())
 					SetPedTalk(npc.ped)
 					PlayAmbientSpeech1(npc.ped, 'GENERIC_HI', 'SPEECH_PARAMS_STANDARD')
+					
+					
 					obj = CreateObject(GetHashKey('prop_weed_bottle'), 0, 0, 0, true)
-					AttachEntityToEntity(obj, PlayerPedId(), GetPedBoneIndex(PlayerPedId(),  57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
+					AttachEntityToEntity(obj, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
 					obj2 = CreateObject(GetHashKey('hei_prop_heist_cash_pile'), 0, 0, 0, true)
-					AttachEntityToEntity(obj2, npc.ped, GetPedBoneIndex(npc.ped,  57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
+					AttachEntityToEntity(obj2, npc.ped, GetPedBoneIndex(npc.ped, 57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
+					
 					ESX.PlayAnim('mp_common', 'givetake1_a', 8.0, -1, 0)
 					ESX.PlayAnimOnPed(npc.ped, 'mp_common', 'givetake1_a', 8.0, -1, 0)
 					Wait(1000)
-					if Config.randomsuccessalert then
-					if alert <= Config.randomsuccesschance then
-							PlayAmbientSpeech1(npc.ped, 'GENERIC_HI', 'SPEECH_PARAMS_STANDARD')
-							drugToSell.coords = GetEntityCoords(PlayerPedId())
-							TriggerServerEvent('stasiek_selldrugsv2:notifycops', drugToSell)
-						end
+					
+					if alert <= 23 then
+						PlayAmbientSpeech1(npc.ped, 'GENERIC_HI', 'SPEECH_PARAMS_STANDARD')
+						drugToSell.coords = GetEntityCoords(PlayerPedId())
+						TriggerServerEvent('stasiek_selldrugsv2:notifycops', drugToSell)
 					end
-					AttachEntityToEntity(obj2, PlayerPedId(), GetPedBoneIndex(PlayerPedId(),  57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
-					AttachEntityToEntity(obj, npc.ped, GetPedBoneIndex(npc.ped,  57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
+					
+					AttachEntityToEntity(obj2, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
+					AttachEntityToEntity(obj, npc.ped, GetPedBoneIndex(npc.ped, 57005), 0.13, 0.02, 0.0, -90.0, 0, 0, 1, 1, 0, 1, 0, 1)
 					Wait(1000)
+					
 					DeleteEntity(obj)
 					DeleteEntity(obj2)
 					PlayAmbientSpeech1(npc.ped, 'GENERIC_THANKS', 'SPEECH_PARAMS_STANDARD')
 					SetPedAsNoLongerNeeded(npc.ped)
 					TriggerServerEvent('stasiek_selldrugsv2:pay', drugToSell)
-					LocalPlayer.state.invBusy = false
+					
 					lib.notify({
 						title = Config.notify.title,
 						description = (Config.notify.sold):format(drugToSell.count, drugToSell.label, drugToSell.price),
@@ -329,19 +313,11 @@ next_ped = function(drugToSell)
 						duration = 8000,
 						icon = 'pills'
 					})
-					if Config.deleteped then
-						lib.progressBar({
-							duration = Config.deletepedtime,
-							label = Config.notify.deletepedtext,
-							useWhileDead = false,
-							canCancel = false,
-							disable = {
-								car = true,
-							},
-						})
-						DeletePed(npc.ped)
-					end
+					
+					Wait(7000)
+					LocalPlayer.state.invBusy = false 
 					npc = {}
+					canSell = true 
 				end
 			end
 		end
